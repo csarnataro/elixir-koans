@@ -1,7 +1,18 @@
-FROM elixir:1.5
-RUN apt-get update && apt-get install -y inotify-tools
-WORKDIR /elixir-koans
-ADD . /elixir-koans/
-RUN mix local.hex --force
-RUN mix deps.get
-CMD mix meditate
+ARG VARIANT=latest
+FROM elixir:${VARIANT}
+
+RUN apt-get update && \
+    apt-get install -y postgresql-client && \
+    apt-get install -y inotify-tools && \
+    apt-get install -y nodejs && \
+    apt-get install -y git && \
+    curl -L https://npmjs.org/install.sh | sh && \
+    mix local.hex --force && \
+    mix archive.install hex phx_new ${PHX_VERSION} --force && \
+    mix local.rebar --force
+
+ENV APP_HOME /app
+RUN mkdir $APP_HOME
+WORKDIR $APP_HOME
+
+EXPOSE 4000
